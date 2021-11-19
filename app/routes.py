@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
+from app.models import Business, Category
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 
@@ -12,13 +13,13 @@ def index():
 
 @app.route('/shops')
 def shops():
-    shops = 'name of shops table'.query.all()
+    shops = Business.query.all()
     return render_template('shops.html', shops=shops)
 
 
 @app.route('/categories')
 def categories():
-    categories = 'name of categories table'.query.all()
+    categories = Category.query.all()
     return render_template('categories.html', categories=categories)
 
 
@@ -27,8 +28,12 @@ def categories():
 def add_business():
 
 
-@app.route('/business')
-def business():
+@app.route('/shops/<name>')
+def business(name):
+    business = Business.query.filter_by(name=name).first()
+    category_list = []
+    for cat in business.b2c:
+        category_list.append(cat.category.name)
 
 
 @app.route('/reviews')
