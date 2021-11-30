@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+    {% extends "base.html" %}
+    {% block content %}
+        {% if current_user.is_anonymous %}
+            <h2> Welcome to ShopSmall!</h2>
+            <p>Find info about local businesses here in Ithaca.</p>
+        {% else %}
+            <h2>Welcome to Ithaca Books, {{ current_user.username }}!</h2>
+            <p>Find info about local businesses, save your preferences, and leave reviews.</p>
+        {% endif %}
+{% endblock %}
+</html>
