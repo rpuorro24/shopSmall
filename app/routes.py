@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.models import Business, Category
+from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, OwnerRegistrationForm
+from app.models import Business, Category, Customer, BusinessOwner
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 
@@ -26,6 +27,19 @@ def categories():
 @app.route('/add_business')
 @login_required
 def add_business():
+    form = AddBusinessForm()
+    form.category.choices = [(c.id, c.name) for c in Category.query.all()]
+    if form.validate_on_submit():
+        flash('{} added to list of businesses'.format(form.name.data))
+        new_business = Business(name=form.name.data, category=form.category.data, description=form.description.data, location=form.location.data, top_items=form.top_items.data)
+        db.session.add(new_business)
+        db.session.commit()
+        for category in form.category.data:
+            c = Category() '''fix this'''
+            db.session.add(c)
+        db.session.commit()
+        return render_template('business.html', title='Business')
+    return render_template('add_business.html', title='Add Business', form=form)
 
 
 @app.route('/shops/<name>')
@@ -70,13 +84,28 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/customer_register', methods=['GET', 'POST'])
+def customer_register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    form = RegistrationForm()
+    form = CustomerRegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data)
+        user = Customer(username=form.username.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('index'))
+    return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/owner_register', methods=['GET', 'POST'])
+def owner_register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = CustomerRegistrationForm()
+    if form.validate_on_submit():
+        user = BusinessOwner(username=form.username.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
