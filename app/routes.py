@@ -35,7 +35,7 @@ def add_business():
         db.session.add(new_business)
         db.session.commit()
         for category in form.category.data:
-            c = Category() '''fix this'''
+            #c = Category() '''fix this'''
             db.session.add(c)
         db.session.commit()
         return render_template('business.html', title='Business')
