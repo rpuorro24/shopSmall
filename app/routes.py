@@ -15,7 +15,12 @@ def index():
 @app.route('/shops')
 def shops():
     shops = Business.query.all()
-    return render_template('shops.html', shops=shops)
+    shop = {'name': shops}
+    my_shops = []
+    for shop in shops:
+        my_shops.append(shop)
+
+    return render_template('shops.html', shops=shops, shop = shop, my_shops = my_shops)
 
 
 @app.route('/categories')
@@ -46,8 +51,9 @@ def add_business():
 def business(name):
     business = Business.query.filter_by(name=name).first()
     category_list = []
-    for cat in business.b2c:
-        category_list.append(cat.category.name)
+#    for cat in business.b2c:
+ #       category_list.append(cat.category.name)
+    return render_template('business.html', business=business)
 
 #
 # @app.route('/reviews')

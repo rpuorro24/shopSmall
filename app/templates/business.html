@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+{% extends "base.html" %}
+<body>
+{% block content %}
+<h2>{{business.name}}</h2>
+<h3>{{business.location}}</h3>
+<p>{{business.description}}</p>
+<ul>
+{% for popular_item in popular_items %}
+    <li>{{popular_item }}</li>
+</ul>
+{% endfor %}
+{% endblock %}
+
+</body>
+</html>

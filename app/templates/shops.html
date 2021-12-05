@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+{% extends "base.html" %}
+<body>
+{% block content %}
+<ul>
+    {% for shop in my_shops %}
+     <p><a href="{{ url_for('business', name= shop.name)}}">{{ shop.name}}</a></p>
+    {% endfor %}
+</ul>
+{% endblock %}
+</body>
+</html>
