@@ -62,11 +62,15 @@ def add_business():
         new_business = Business(name=form.name.data, category=form.category.data, description=form.description.data, location=form.location.data, top_items=form.top_items.data)
         db.session.add(new_business)
         db.session.commit()
-        for category in form.category.data:
-            #c = Category() '''fix this'''
-            db.session.add(c)
+        category= form.category.data
+        b2c= BusinesstoCategory(businessID= new_business.id, categoryID= category)
+        db.session.add(b2c)
         db.session.commit()
-        return render_template('business.html', title='Business')
+        #for category in form.category.data:
+            #c = Category() '''fix this'''
+            #db.session.add(c)
+        #db.session.commit()
+        return render_template('business.html', title='Business', business= new_business)
     return render_template('add_business.html', title='Add Business', form=form)
 
 
@@ -151,9 +155,9 @@ def populate_db():
     db.session.add_all([ca1, ca2, ca3])
     db.session.commit()
 
-    b1 = Business(name="Ithaca Outdoor Store", description="We sell a variety of outdoor equipment and apparel", location="Commons")
-    b2 = Business(name="Autumn Leaves",  description= "Used bookstore", location="Commons")
-    b3 = Business(name="Alphabet Soup",  description= "Children's toy shop", location= "Commons")
+    b1 = Business(name="Ithaca Outdoor Store", description="We sell a variety of outdoor equipment and apparel", location="Commons", category= ca1.name)
+    b2 = Business(name="Autumn Leaves",  description= "Used bookstore", location="Commons", category= ca2.name)
+    b3 = Business(name="Alphabet Soup",  description= "Children's toy shop", location= "Commons", category= ca3.name)
 
     db.session.add_all([b1, b2, b3])
     db.session.commit()
