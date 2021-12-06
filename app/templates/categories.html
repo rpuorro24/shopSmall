@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+{% extends "base.html" %}
+<body>
+{% block content %}
+    <h2>Look for shops by category</h2>
+    {% for category in my_categories %}
+        <li><a href="{{ url_for('category', name= category.name)}}">{{ category.name}}</a></li>
+{#        <li>{{ category.name}}</li>#}
+    {% endfor %}
+{% endblock %}
+</body>
+</html>
