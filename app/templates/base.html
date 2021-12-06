@@ -12,6 +12,8 @@
 
 <body>
 <div><a href = "{{ url_for('index')}}">ShopSmall</a>
+    <a href = "{{url_for('shops')}}">Shops</a>
+    <a href = "{{ url_for('categories')}}">Categories</a>
 </div>
 
     {% with messages = get_flashed_messages() %}
