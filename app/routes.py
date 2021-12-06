@@ -63,8 +63,8 @@ def add_business():
         db.session.add(new_business)
         db.session.commit()
         for category in form.category.data:
-            #c = Category() '''fix this'''
-            db.session.add(c)
+            b2c = BusinesstoCategory(businessID=new_business.id, categoryID=category)
+            db.session.add(b2c)
         db.session.commit()
         return render_template('business.html', title='Business')
     return render_template('add_business.html', title='Add Business', form=form)
@@ -150,7 +150,7 @@ def customer_register():
 def owner_register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    form = CustomerRegistrationForm()
+    form = OwnerRegistrationForm()
     if form.validate_on_submit():
         user = BusinessOwner(username=form.username.data)
         user.set_password(form.password.data)

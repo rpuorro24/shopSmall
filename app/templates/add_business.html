@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+{% extends "base.html" %}
+<body>
+{% block content %}
+    <h2>Add a Business</h2>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}<br>
+            {% for error in form.name.errors %}
+            <span style="...">[{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.description.label }}<br>
+            {{ form.description(size=32) }}<br>
+            {% for error in form.name.errors %}
+            <span style="...">[{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.location.label }}<br>
+            {{ form.location(size=32) }}<br>
+            {% for error in form.name.errors %}
+            <span style="...">[{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.top_items.label }}<br>
+            {{ form.top_items(size=32) }}<br>
+            {% for error in form.name.errors %}
+            <span style="...">[{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+</body>
+</html>
