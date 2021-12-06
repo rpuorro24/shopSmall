@@ -52,7 +52,7 @@ def category(name):
 
 
 
-@app.route('/add_business', methods=['GET', 'POST'])
+@app.route('/add_business')
 @login_required
 def add_business():
     form = AddBusinessForm()
