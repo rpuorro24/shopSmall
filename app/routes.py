@@ -104,7 +104,7 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = Customer.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
@@ -122,6 +122,10 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/register')
+def register():
+    return render_template('register.html', title='Register')
+
 
 @app.route('/customer_register', methods=['GET', 'POST'])
 def customer_register():
@@ -135,7 +139,7 @@ def customer_register():
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('index'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('customer_register.html', title='Register', form=form)
 
 
 @app.route('/owner_register', methods=['GET', 'POST'])
@@ -150,7 +154,7 @@ def owner_register():
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('index'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('owner_register.html', title='Register', form=form)
 
 @app.route('/populate_db')
 def populate_db():
