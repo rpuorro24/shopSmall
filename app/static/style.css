@@ -1,0 +1,30 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300&display=swap');
+
+
+h1, h2, h3, h4, h5, h6{
+    /*font-family:'Fuzzy Bubbles', cursive;*/
+    font-family: "Fuzzy Bubbles", cursive;
+}
+
+p{
+    font-family: 'Nunito', sans-serif;
+    color: black;
+}
+
+a, a.hover{
+    font-family: 'Nunito', sans-serif;
+    color: black;
+    text-decoration: none;
+}
+
+input{
+    /*width: 100%;*/
+    padding: 12px 20px;
+}
+
+body{
+    background-color: #B8F288;
+    margin-left: 50px;
+}
