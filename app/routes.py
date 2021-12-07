@@ -59,11 +59,18 @@ def add_business():
     form.category.choices = [(c.id, c.name) for c in Category.query.all()]
     if form.validate_on_submit():
         flash('{} added to list of businesses'.format(form.name.data))
-        new_business = Business(name=form.name.data, category=form.category.data, description=form.description.data, location=form.location.data, top_items=form.top_items.data)
+        if form.new_category.data != "":
+            category = form.new_category.data
+            c = Category(name=category)
+            db.session.add(c)
+            db.session.commit()
+        else:
+             c = Category.query.filter_by(id=form.category.data).first()
+        new_business = Business(name=form.name.data, category=c.name, description=form.description.data,
+                                location=form.location.data, top_items=form.top_items.data)
         db.session.add(new_business)
         db.session.commit()
-        category= form.category.data
-        b2c= BusinesstoCategory(businessID= new_business.id, categoryID= category)
+        b2c= BusinesstoCategory(businessID= new_business.id, categoryID= c.id)
         db.session.add(b2c)
         db.session.commit()
         #for category in form.category.data:

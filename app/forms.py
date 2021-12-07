@@ -7,6 +7,7 @@ from app.models import Customer, BusinessOwner, Category
 class AddBusinessForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     category = SelectField('Category', validators=[DataRequired()], coerce=int)
+    new_category = StringField("Don't see your category? Add another:")
     description = TextAreaField('Description', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
     top_items = TextAreaField('Top Items', validators=[DataRequired()])
