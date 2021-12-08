@@ -34,6 +34,20 @@
             <span style="...">[{{ error }}</span>
             {% endfor %}
         </p>
+        <p>
+            {{ form.category.label }}<br>
+            {{ form.category(size=32) }}<br>
+            {% for error in form.name.errors %}
+            <span style="color: red;">[{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.new_category.label }}<br>
+            {{ form.new_category(size=32) }}<br>
+            {% for error in form.name.errors %}
+            <span style="color: red;">[{{ error }}</span>
+            {% endfor %}
+        </p>
         <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}
