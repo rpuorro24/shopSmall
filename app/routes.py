@@ -4,12 +4,18 @@ from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, Owne
 from app.models import Business, Category, Customer, BusinessOwner, BusinesstoCategory
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
+import random
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', title= "Home")
+    num= Business.query.count()
+    my_num= random.randint(1, num)
+    business= Business.query.filter_by(id=my_num).first()
+    popular_items = business.top_items.split(", ")
+    return render_template('index.html', title= "Home", business=business, popular_items= popular_items)
+
 
 
 @app.route('/shops')
@@ -87,7 +93,8 @@ def business(name):
     category_list = []
 #    for cat in business.b2c:
  #       category_list.append(cat.category.name)
-    return render_template('business.html', business=business)
+    popular_items= business.top_items.split(", ")
+    return render_template('business.html', business=business, popular_items=popular_items)
 
 #
 # @app.route('/reviews')
@@ -166,9 +173,9 @@ def populate_db():
     db.session.add_all([ca1, ca2, ca3])
     db.session.commit()
 
-    b1 = Business(name="Ithaca Outdoor Store", description="We sell a variety of outdoor equipment and apparel", location="Commons", category= ca1.name)
-    b2 = Business(name="Autumn Leaves",  description= "Used bookstore", location="Commons", category= ca2.name)
-    b3 = Business(name="Alphabet Soup",  description= "Children's toy shop", location= "Commons", category= ca3.name)
+    b1 = Business(name="Ithaca Outdoor Store", description="We sell a variety of outdoor equipment and apparel", location="Commons", category= ca1.name, top_items="Bikes, tshirts, sweatshirts")
+    b2 = Business(name="Autumn Leaves",  description= "Used bookstore", location="Commons", category= ca2.name, top_items= "Books, bags, notebooks")
+    b3 = Business(name="Alphabet Soup",  description= "Children's toy shop", location= "Commons", category= ca3.name, top_items= "Dolls, stuffed animals, puzzles")
 
     db.session.add_all([b1, b2, b3])
     db.session.commit()

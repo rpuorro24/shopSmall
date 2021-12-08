@@ -9,6 +9,16 @@
             <h2>Welcome to ShopSmall, {{ current_user.username }}!</h2>
             <p>Find info about local businesses, save your preferences, and leave reviews.</p>
         {% endif %}
+<h3>Business of the Day:</h3>
+        <h4>{{business.name}}</h4>
+<h5>{{business.location}}</h5>
+<p>{{business.description}}</p>
+    <p>Popular items include:</p>
+{% for popular_item in popular_items %}
+    <ul>
+    <li>{{popular_item}}</li>
+</ul>
+{% endfor %}
 {% endblock %}
 </html>
 
