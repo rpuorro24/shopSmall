@@ -1,15 +1,21 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, OwnerRegistrationForm
+from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, OwnerRegistrationForm, ReviewForm
 from app.models import Business, Category, Customer, BusinessOwner, BusinesstoCategory
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
+import random
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', title= "Home")
+    num= Business.query.count()
+    my_num= random.randint(1, num)
+    business= Business.query.filter_by(id=my_num).first()
+    popular_items = business.top_items.split(", ")
+    return render_template('index.html', title= "Home", business=business, popular_items= popular_items)
+
 
 
 @app.route('/shops')
@@ -52,23 +58,42 @@ def category(name):
 
 
 
-@app.route('/add_business')
+@app.route('/add_business', methods=['GET', 'POST'])
 @login_required
 def add_business():
     form = AddBusinessForm()
     form.category.choices = [(c.id, c.name) for c in Category.query.all()]
     if form.validate_on_submit():
         flash('{} added to list of businesses'.format(form.name.data))
-        new_business = Business(name=form.name.data, category=form.category.data, description=form.description.data, location=form.location.data, top_items=form.top_items.data)
+        if form.new_category.data != "":
+            category = form.new_category.data
+            c = Category(name=category)
+            db.session.add(c)
+            db.session.commit()
+        else:
+             c = Category.query.filter_by(id=form.category.data).first()
+        new_business = Business(name=form.name.data, category=c.name, description=form.description.data,
+                                location=form.location.data, top_items=form.top_items.data)
         db.session.add(new_business)
         db.session.commit()
-        for category in form.category.data:
-            b2c = BusinesstoCategory(businessID=new_business.id, categoryID=category)
-            db.session.add(b2c)
+        b2c= BusinesstoCategory(businessID= new_business.id, categoryID= c.id)
+        db.session.add(b2c)
         db.session.commit()
-        return render_template('business.html', title='Business')
+        #for category in form.category.data:
+            #c = Category() '''fix this'''
+            #db.session.add(c)
+        #db.session.commit()
+        return render_template('business.html', title='Business', business= new_business)
     return render_template('add_business.html', title='Add Business', form=form)
 
+
+@app.route('/review', methods=['GET', 'POST'])
+def review():
+    form= ReviewForm()
+    form.business.choices = [(b.id, b.name) for b in Business.query.all()]
+    if form.validate_on_submit():
+        flash("Review added for {}".format(form.business.data))
+    return render_template('review.html', title='Review', form=form)
 
 @app.route('/shops/<name>')
 def business(name):
@@ -76,7 +101,8 @@ def business(name):
     category_list = []
 #    for cat in business.b2c:
  #       category_list.append(cat.category.name)
-    return render_template('business.html', business=business)
+    popular_items= business.top_items.split(", ")
+    return render_template('business.html', business=business, popular_items=popular_items)
 
 #
 # @app.route('/reviews')
@@ -87,35 +113,18 @@ def business(name):
 # def add_review():
 
 
-@app.route('/customer_login', methods=['GET', 'POST'])
-def customer_login():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = Customer.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-            return redirect(next_page)
-        return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
-
-
-@app.route('/owner_login', methods=['GET', 'POST'])
-def owner_login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = BusinessOwner.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
+            user= BusinessOwner.query.filter_by(username=form.username.data).first()
+            if user is None or not user.check_password(form.password.data):
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
@@ -130,6 +139,10 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/register')
+def register():
+    return render_template('register.html', title='Register')
+
 
 @app.route('/customer_register', methods=['GET', 'POST'])
 def customer_register():
@@ -143,22 +156,37 @@ def customer_register():
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('index'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('customer_register.html', title='Register', form=form)
 
-
-@app.route('/owner_register', methods=['GET', 'POST'])
+@app.route('/business_register', methods=['GET', 'POST'])
 def owner_register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = OwnerRegistrationForm()
+    form.category.choices = [(c.id, c.name) for c in Category.query.all()]
     if form.validate_on_submit():
         user = BusinessOwner(username=form.username.data)
         user.set_password(form.password.data)
+        if form.new_category.data != "":
+            category = form.new_category.data
+            c = Category(name=category)
+            db.session.add(c)
+            db.session.commit()
+        else:
+             c = Category.query.filter_by(id=form.category.data).first()
+        new_business = Business(name=form.name.data, category=c.name, description=form.description.data,
+                                location=form.location.data, top_items=form.top_items.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        db.session.add(new_business)
+        db.session.commit()
+        b2c= BusinesstoCategory(businessID= new_business.id, categoryID= c.id)
+        db.session.add(b2c)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user and your business has been added!')
         return redirect(url_for('index'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('owner_register.html', title='Register', form=form)
+
 
 @app.route('/populate_db')
 def populate_db():
@@ -170,9 +198,9 @@ def populate_db():
     db.session.add_all([ca1, ca2, ca3])
     db.session.commit()
 
-    b1 = Business(name="Ithaca Outdoor Store", description="We sell a variety of outdoor equipment and apparel", location="Commons")
-    b2 = Business(name="Autumn Leaves",  description= "Used bookstore", location="Commons")
-    b3 = Business(name="Alphabet Soup",  description= "Children's toy shop", location= "Commons")
+    b1 = Business(name="Ithaca Outdoor Store", description="We sell a variety of outdoor equipment and apparel", location="Commons", category= ca1.name, top_items="Bikes, tshirts, sweatshirts")
+    b2 = Business(name="Autumn Leaves",  description= "Used bookstore", location="Commons", category= ca2.name, top_items= "Books, bags, notebooks")
+    b3 = Business(name="Alphabet Soup",  description= "Children's toy shop", location= "Commons", category= ca3.name, top_items= "Dolls, stuffed animals, puzzles")
 
     db.session.add_all([b1, b2, b3])
     db.session.commit()

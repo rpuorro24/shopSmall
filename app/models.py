@@ -6,7 +6,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class Business(db.Model):
     id = db.Column(db.Integer, primary_key= True)
     name = db.Column(db.String(64))
-    category = db.relationship("Category", backref= "Category", lazy= "dynamic")
+    #category = db.relationship("Category", backref= "Category", lazy= "dynamic")
+    #owner = db.Column(db.String(50), db.ForeignKey("business_owner.id"))
+    category= db.Column(db.String(50), db.ForeignKey("category.id"))
     description = db.Column(db.String(200))
     location = db.Column(db.String(64))
     top_items = db.Column(db.String(100))
@@ -53,7 +55,8 @@ class BusinessOwner(UserMixin, db.Model):
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
-    businessID= db.Column(db.Integer, db.ForeignKey("business.id"))
+    #businessID= db.Column(db.Integer, db.ForeignKey("business.id"))
+    business= db.relationship("Business", backref= "Business", lazy= "dynamic")
 
     def __repr__(self):
         return '<Category {}>'.format(self.name)
