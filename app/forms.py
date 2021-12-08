@@ -42,9 +42,20 @@ class OwnerRegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Repeat Password', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    category = SelectField('Category', validators=[DataRequired()], coerce=int)
+    new_category = StringField("Don't see your category? Add another:")
+    description = TextAreaField('Description', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    top_items = TextAreaField('Top Items', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
     def validate_username(self, username):
         user = BusinessOwner.query.filter_by(username=username.data).first()
         if user is not None:
             raise ValidationError('Please use a different username.')
+
+class ReviewForm(FlaskForm):
+    business= SelectField('Category', validators=[DataRequired()], coerce=int)
+    review = StringField('Leave a review', validators=[DataRequired()])
+    submit = SubmitField('Submit')

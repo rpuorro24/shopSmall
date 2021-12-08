@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, OwnerRegistrationForm
+from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, OwnerRegistrationForm, ReviewForm
 from app.models import Business, Category, Customer, BusinessOwner, BusinesstoCategory
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
@@ -87,6 +87,14 @@ def add_business():
     return render_template('add_business.html', title='Add Business', form=form)
 
 
+@app.route('/review', methods=['GET', 'POST'])
+def review():
+    form= ReviewForm()
+    form.business.choices = [(b.id, b.name) for b in Business.query.all()]
+    if form.validate_on_submit():
+        flash("Review added for {}".format(form.business.data))
+    return render_template('review.html', title='Review', form=form)
+
 @app.route('/shops/<name>')
 def business(name):
     business = Business.query.filter_by(name=name).first()
@@ -113,8 +121,10 @@ def login():
     if form.validate_on_submit():
         user = Customer.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
+            user= BusinessOwner.query.filter_by(username=form.username.data).first()
+            if user is None or not user.check_password(form.password.data):
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
@@ -148,20 +158,35 @@ def customer_register():
         return redirect(url_for('index'))
     return render_template('customer_register.html', title='Register', form=form)
 
-
-@app.route('/owner_register', methods=['GET', 'POST'])
+@app.route('/business_register', methods=['GET', 'POST'])
 def owner_register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    form = CustomerRegistrationForm()
+    form = OwnerRegistrationForm()
+    form.category.choices = [(c.id, c.name) for c in Category.query.all()]
     if form.validate_on_submit():
         user = BusinessOwner(username=form.username.data)
         user.set_password(form.password.data)
+        if form.new_category.data != "":
+            category = form.new_category.data
+            c = Category(name=category)
+            db.session.add(c)
+            db.session.commit()
+        else:
+             c = Category.query.filter_by(id=form.category.data).first()
+        new_business = Business(name=form.name.data, category=c.name, description=form.description.data,
+                                location=form.location.data, top_items=form.top_items.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        db.session.add(new_business)
+        db.session.commit()
+        b2c= BusinesstoCategory(businessID= new_business.id, categoryID= c.id)
+        db.session.add(b2c)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user and your business has been added!')
         return redirect(url_for('index'))
     return render_template('owner_register.html', title='Register', form=form)
+
 
 @app.route('/populate_db')
 def populate_db():

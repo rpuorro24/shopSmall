@@ -21,7 +21,7 @@
        <a href = "{{ url_for('register')}}">Register</a>
     {% else %}
        <a href = "{{ url_for('add_business')}}">Add New Business</a>
-{#       <a href = "{{ url_for('reviews') }}">Leave a Review</a>#}
+       <a href = "{{ url_for('review') }}">Leave a Review</a>
         <a href="{{ url_for('logout') }}">Logout</a>
     {% endif %}
 

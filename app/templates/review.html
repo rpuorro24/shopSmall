@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+{% extends "base.html" %}
+<body>
+{% block content %}
+<h2>Leave a Review</h2>
+   <form action="" method="post" novalidate autocomplete="off">
+        {{ form.hidden_tag() }}
+    <p>
+        {{ form.business.label }}<br>
+        {{ form.business }}<br>
+        {% for error in form.business.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+    </p>
+
+     <p>
+       {{ form.review.label }}<br>
+       {{ form.review(size=250) }}<br>
+       {% for error in form.review.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+    </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+</body>
+</html>

@@ -7,6 +7,7 @@ class Business(db.Model):
     id = db.Column(db.Integer, primary_key= True)
     name = db.Column(db.String(64))
     #category = db.relationship("Category", backref= "Category", lazy= "dynamic")
+    #owner = db.Column(db.String(50), db.ForeignKey("business_owner.id"))
     category= db.Column(db.String(50), db.ForeignKey("category.id"))
     description = db.Column(db.String(200))
     location = db.Column(db.String(64))
