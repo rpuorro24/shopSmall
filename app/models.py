@@ -23,7 +23,7 @@ class Customer(UserMixin, db.Model):
     username = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
     favorites = db.relationship("Business", backref="business", lazy= "dynamic")
-    reviews = db.Column(db.String(500))
+    reviews = db.Column(db.String(500), db.ForeignKey("review.id"))
 
     def __repr__(self):
         return '<Customer {}>'.format(self.username)
@@ -66,14 +66,40 @@ class BusinesstoCategory(db.Model):
     businessID = db.Column(db.Integer, db.ForeignKey('business.id'))
     categoryID = db.Column(db.Integer, db.ForeignKey('category.id'))
 
+
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    business= db.Column(db.String(200), db.ForeignKey("business.id"))
+    customer= db.relationship("Customer", backref="Customer", lazy="dynamic")
+    review= db.Column(db.String(500))
+
+
+class ReviewtoBusiness(db.Model):
+    id=db.Column(db.Integer, primary_key= True)
+    businessID= db.Column(db.Integer, db.ForeignKey('business.id'))
+    reviewID= db.Column(db.Integer, db.ForeignKey('review.id'))
+
+
+class CustomertoReview(db.Model):
+    id=db.Column(db.Integer, primary_key= True)
+    customerID= db.Column(db.Integer, db.ForeignKey('customer.id'))
+    reviewID= db.Column(db.Integer, db.ForeignKey('review.id'))
+
+
+class BusinesstoBusinessOwner(db.Model):
+    id=db.Column(db.Integer, primary_key=True)
+    ownerID= db.Column(db.Integer, db.ForeignKey('business_owner.id'))
+    businessID= db.Column(db.Integer, db.ForeignKey('business.id'))
+
+
 @login.user_loader
 def load_customer(id):
-    return Customer.query.get(int(id))
+    return Customer.query.get(id)
 
 
-#@login.user_loader
-#def load_business_owner(id):
-#    return BusinessOwner.query.get(int(id))
+@login.user_loader
+def load_business_owner(id):
+    return BusinessOwner.query.get(id)
 
 
 

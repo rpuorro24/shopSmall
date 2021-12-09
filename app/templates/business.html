@@ -6,11 +6,15 @@
 <h2>{{business.name}}</h2>
 <h3>{{business.location}}</h3>
 <p>{{business.description}}</p>
-    <p>Popular items include:</p>
+    <h4>Popular items include:</h4>
 {% for popular_item in popular_items %}
     <ul>
     <li>{{popular_item}}</li>
 </ul>
+{% endfor %}
+    <h4>Customer reviews: </h4>
+    {% for review in reviews %}
+        <p>{{ review }}</p>
 {% endfor %}
 {% endblock %}
 
