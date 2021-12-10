@@ -134,10 +134,14 @@ def profile():
     for c in c2r:
         if c.customerID == current_user.id:
             r = Review.query.filter_by(id=c.reviewID).first()
+            r1= r.review
         for bu in r2b:
             if bu.reviewID == r.id:
                 by = Business.query.filter_by(id=bu.businessID).first()
-        my_reviews.append([by, r])
+                b1= by.name
+        x = b1 + ": " + r1
+        my_reviews.append(x)
+        #my_reviews.append([by, r])
     if BusinessOwner.query.filter_by(username=current_user.username).first():
         b2o = BusinesstoBusinessOwner.query.all()
         for b in b2o:
