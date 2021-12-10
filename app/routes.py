@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
 from app.forms import AddBusinessForm, LoginForm, CustomerRegistrationForm, OwnerRegistrationForm, ReviewForm
-from app.models import Business, Category, Customer, BusinessOwner, BusinesstoCategory
+from app.models import Business, Category, Customer, BusinessOwner, Review, BusinesstoCategory, BusinesstoBusinessOwner, ReviewtoBusiness, CustomertoReview
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 import random
@@ -79,10 +79,7 @@ def add_business():
         b2c= BusinesstoCategory(businessID= new_business.id, categoryID= c.id)
         db.session.add(b2c)
         db.session.commit()
-        #for category in form.category.data:
-            #c = Category() '''fix this'''
-            #db.session.add(c)
-        #db.session.commit()
+
         return render_template('business.html', title='Business', business= new_business)
     return render_template('add_business.html', title='Add Business', form=form)
 
@@ -92,17 +89,30 @@ def review():
     form= ReviewForm()
     form.business.choices = [(b.id, b.name) for b in Business.query.all()]
     if form.validate_on_submit():
-        flash("Review added for {}".format(form.business.data))
+        r= Review(business= form.business.data, review= form.review.data, customer= current_user.username)
+        db.session.add(r)
+        db.session.commit()
+        r2b= ReviewtoBusiness(businessID= form.business.data, reviewID= r.id)
+        db.session.add(r2b)
+        db.session.commit()
+        c= Customer.query.filter_by(username= current_user.username).first()
+        c2r= CustomertoReview(customerID= c.id, reviewID= r.id)
+        db.session.add(c2r)
+        db.session.commit()
+        flash("Review added for {}".format(Business.query.filter_by(id=form.business.data).first().name))
+        return redirect(url_for('index'))
     return render_template('review.html', title='Review', form=form)
 
 @app.route('/shops/<name>')
 def business(name):
     business = Business.query.filter_by(name=name).first()
-    category_list = []
-#    for cat in business.b2c:
- #       category_list.append(cat.category.name)
     popular_items= business.top_items.split(", ")
-    return render_template('business.html', business=business, popular_items=popular_items)
+    reviews=[]
+    review_data= Review.query.all()
+    for review in review_data:
+        if int(review.business)==business.id:
+            reviews.append(review)
+    return render_template('business.html', business=business, popular_items=popular_items, reviews=reviews)
 
 #
 # @app.route('/reviews')
@@ -111,6 +121,27 @@ def business(name):
 # @app.route('/add_review')
 # @login_required
 # def add_review():
+
+@app.route('/profile')
+def profile():
+    my_reviews=[]
+    my_business = []
+    c2r= CustomertoReview.query.all()
+    r2b= ReviewtoBusiness.query.all()
+    for c in c2r:
+        if c.customerID == current_user.id:
+            r = Review.query.filter_by(id =c.reviewID).first()
+        for bu in r2b:
+            if bu.reviewID== r.id:
+                by= Business.query.filter_by(id= bu.businessID).first()
+        my_reviews.append([by, r])
+    if BusinessOwner.query.filter_by(username= current_user.username).first():
+        b2o= BusinesstoBusinessOwner.query.all()
+        for b in b2o:
+            if b.ownerID== current_user.id:
+                m= Business.query.filter_by(id= b.businessID)
+                my_business.append(m.name)
+    return render_template('profile.html', reviews= my_reviews, business= my_business)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -209,9 +240,22 @@ def populate_db():
     c1 = Customer(username="dberman")
     c2 = Customer(username="jsmith")
     c3 = Customer(username="segner")
-
     db.session.add_all([c1, c2, c3])
     db.session.commit()
+
+    o1= BusinessOwner(username= "jscout", businessID= b1.id)
+    o2= BusinessOwner(username= "hpotter", businessID= b2.id)
+    o3= BusinessOwner(username="pjackson", businessID= b3.id)
+
+    db.session.add_all([o1, o2, o3])
+    db.session.commit()
+
+    o2b1= BusinesstoBusinessOwner(businessID= b1.id, ownerID= o1.id)
+    o2b2 = BusinesstoBusinessOwner(businessID=b2.id, ownerID=o2.id)
+    o2b3 = BusinesstoBusinessOwner(businessID=b3.id, ownerID=o3.id)
+    db.session.add_all([o2b1, o2b2, o2b3])
+    db.session.commit()
+
 
     b2c1= BusinesstoCategory(businessID= b2.id, categoryID= ca1.id)
     b2c2= BusinesstoCategory(businessID= b1.id, categoryID= ca2.id)
