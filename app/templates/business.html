@@ -12,10 +12,12 @@
     <li>{{popular_item}}</li>
 </ul>
 {% endfor %}
-    <h4>Customer reviews: </h4>
-    {% for review in reviews %}
-        <p>{{ review }}</p>
-{% endfor %}
+   {%if reviews%}
+        <h4>Customer reviews: </h4>
+        {% for review in reviews %}
+        <p>{{ review.customer }} says: <br>{{ review.review }}</p>
+        {% endfor %}
+    {% endif %}
 {% endblock %}
 
 </body>

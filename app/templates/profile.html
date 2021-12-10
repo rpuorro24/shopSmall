@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+{% extends "base.html" %}
+<body>
+{% block content %}
+<h1> {{ current_user.username }}'s profile</h1>
+
+<h3>My reviews:</h3>
+{% if reviews %}
+    {% for review in reviews %}
+        {% for r in review %}
+            <p>{{ r.name }}:</p>
+            <p> {{ r.review }}</p>
+            {% endfor %}
+    {% endfor %}
+{% else %}
+    <p>You haven't left any reviews yet! Leave one <b><a href = "{{ url_for('review')}}">here</a></b></p>
+{% endif %}
+
+{% if business%}
+<h3>My businesses:</h3>
+    {% for b in business %}
+        <p>{{ b }}</p>
+   {% endfor %}
+{% endif %}
+{% endblock %}
+</body>
+</html>

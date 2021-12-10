@@ -89,13 +89,18 @@ def review():
     form= ReviewForm()
     form.business.choices = [(b.id, b.name) for b in Business.query.all()]
     if form.validate_on_submit():
-        r= Review(business= form.business.data, review= form.review.data)
+        r= Review(business= form.business.data, review= form.review.data, customer= current_user.username)
         db.session.add(r)
         db.session.commit()
-        r2b= ReviewtoBusiness(businessID= Business.query.filter_by(name=form.business.data).first(), reviewID= r.id)
+        r2b= ReviewtoBusiness(businessID= form.business.data, reviewID= r.id)
         db.session.add(r2b)
         db.session.commit()
-        flash("Review added for {}".format(form.business.data))
+        c= Customer.query.filter_by(username= current_user.username).first()
+        c2r= CustomertoReview(customerID= c.id, reviewID= r.id)
+        db.session.add(c2r)
+        db.session.commit()
+        flash("Review added for {}".format(Business.query.filter_by(id=form.business.data).first().name))
+        return redirect(url_for('index'))
     return render_template('review.html', title='Review', form=form)
 
 @app.route('/shops/<name>')
@@ -106,7 +111,7 @@ def business(name):
     review_data= Review.query.all()
     for review in review_data:
         if int(review.business)==business.id:
-            reviews.append(review.review)
+            reviews.append(review)
     return render_template('business.html', business=business, popular_items=popular_items, reviews=reviews)
 
 #
@@ -116,6 +121,27 @@ def business(name):
 # @app.route('/add_review')
 # @login_required
 # def add_review():
+
+@app.route('/profile')
+def profile():
+    my_reviews=[]
+    my_business = []
+    c2r= CustomertoReview.query.all()
+    r2b= ReviewtoBusiness.query.all()
+    for c in c2r:
+        if c.customerID == current_user.id:
+            r = Review.query.filter_by(id =c.reviewID).first()
+        for bu in r2b:
+            if bu.reviewID== r.id:
+                by= Business.query.filter_by(id= bu.businessID).first()
+        my_reviews.append([by, r])
+    if BusinessOwner.query.filter_by(username= current_user.username).first():
+        b2o= BusinesstoBusinessOwner.query.all()
+        for b in b2o:
+            if b.ownerID== current_user.id:
+                m= Business.query.filter_by(id= b.businessID)
+                my_business.append(m.name)
+    return render_template('profile.html', reviews= my_reviews, business= my_business)
 
 
 @app.route('/login', methods=['GET', 'POST'])

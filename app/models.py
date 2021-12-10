@@ -70,7 +70,8 @@ class BusinesstoCategory(db.Model):
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     business= db.Column(db.String(200), db.ForeignKey("business.id"))
-    customer= db.relationship("Customer", backref="Customer", lazy="dynamic")
+    customer= db.Column(db.String(50), db.ForeignKey("customer.username"))
+    #customerDB= db.relationship("Customer", backref="Customer", lazy="dynamic")
     review= db.Column(db.String(500))
 
 
@@ -97,9 +98,9 @@ def load_customer(id):
     return Customer.query.get(id)
 
 
-@login.user_loader
-def load_business_owner(id):
-    return BusinessOwner.query.get(id)
+# @login.user_loader
+# def load_business_owner(id):
+#     return BusinessOwner.query.get(id)
 
 
 
